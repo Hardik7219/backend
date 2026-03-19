@@ -10,7 +10,7 @@ const analys= require('./models/analys.Model')
 const validator = require('validator');
 const crypto = require('crypto');
 const mailer = require('./mailer');
-
+const port = process.env.PORT || 4000 
 app.use(cookies())
 app.use(cors({
     origin: "http://localhost:5173", // your React app
@@ -297,4 +297,4 @@ app.post('/reset-password/:token', async (req, res) => {
 
     res.json({ success: true, message: "Password reset successfully. You can now log in." });
 });
-app.listen(4000)
+app.listen(port)
