@@ -11,6 +11,7 @@ const validator = require('validator');
 const crypto = require('crypto');
 const mailer = require('./mailer');
 const port = process.env.PORT || 4000 
+
 app.use(cookies())
 app.use(cors({
     origin: "http://localhost:5173", // your React app
@@ -125,7 +126,7 @@ app.post('/login', async (req, res) => {
 
         const token = jwt.sign(
             { id: findUser._id, username : findUser.userName ,email: findUser.email},
-            "secret",{expiresIn : '7d'});
+            process.env.JWT_SECRET,{expiresIn : '7d'});
 
         res.cookie("token", token, {
             httpOnly: true,
@@ -160,7 +161,7 @@ app.get('/me', async (req,res)=>{
 });
 
     try {
-        const decoded = jwt.verify(token, "secret");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         res.json({
             id: decoded.id,
@@ -297,4 +298,4 @@ app.post('/reset-password/:token', async (req, res) => {
 
     res.json({ success: true, message: "Password reset successfully. You can now log in." });
 });
-app.listen(port)
+app.listen(4000)
