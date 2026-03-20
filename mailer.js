@@ -2,8 +2,12 @@ const { Resend } = require('resend');
  
 const resend = new Resend(process.env.RESEND_API_KEY);
  
-async function sendMail({ to, subject, html }) {
-    const from = process.env.EMAIL_USER || 'onboarding@resend.dev';
+async function sendMail({ from, to, subject, html }) {
+    if(!from)
+    {
+            const from ='onboarding@resend.dev';
+    } 
+            
  
     const { error } = await resend.emails.send({
         from,
