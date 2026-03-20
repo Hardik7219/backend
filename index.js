@@ -211,7 +211,7 @@ app.post('/friend', async (req,res)=>{
         });
     }
 })
-
+s
 app.post('/analys', async (req, res) => {
     const { 
         basicStats, 
@@ -268,7 +268,7 @@ app.post('/forgot-password', async (req, res) => {
 
     // Always return the same message — don't reveal if email exists or not
     if (!user) {
-        return res.json({ message: "If that email exists, a reset link has been sent" });
+        return res.json({ message: "user If that email exists, a reset link has been sent" });
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
