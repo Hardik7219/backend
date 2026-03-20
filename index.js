@@ -59,6 +59,44 @@ app.post('/create', async (req, res) => {
         });
         const baseURL = process.env.BASE_URL || "http://localhost:4000";
         // Send verification email
+
+            await mailer.sendMail({
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Verify your email',
+                html: `
+                <div style="font-family: Arial; text-align: center;">
+                <h2>Verify Your Email</h2>
+                <p>Click the button below to verify your account:</p>
+                <a href="${baseURL}/verify/${verifyToken}" 
+                style="padding:10px 20px; background:#4CAF50; color:white; text-decoration:none; border-radius:5px;">
+                Verify Email
+                </a>
+                <p>If you didn’t request this, ignore this email.</p>
+                </div>
+                `
+            });
+            
+            return res.json({ success: true, message: "Check your email to verify your account" });
+
+    } catch (error) {
+        res.status(500).json({ message: "Error creating user" });
+    }
+});
+
+app.get('/varify' , async (req,res)=>{
+    const {email} = req.body
+    try {
+        const user = await users.findOne({email:email})
+        if(!user) return res.json({message:'user not found'})
+        if(user.isVerified) return res.json({message:'already varified'})
+        
+        const verifyToken = crypto.randomBytes(32).toString('hex');
+        user.verifyToken= verifyToken
+        await user.save();
+        const baseURL = process.env.BASE_URL || "http://localhost:4000";
+        // Send verification email
+
             await mailer.sendMail({
                 from: process.env.EMAIL_USER,
                 to: email,
@@ -78,12 +116,11 @@ app.post('/create', async (req, res) => {
             
             res.json({ success: true, message: "Check your email to verify your account" });
 
-
     } catch (error) {
-        res.status(500).json({ message: "Error creating user" });
+        return res.json({message : 'can not varify yet'})
     }
-});
 
+})
 app.get('/verify/:token', async (req, res) => {
     const user = await users.findOne({ verifyToken: req.params.token });
 
