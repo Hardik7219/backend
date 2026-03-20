@@ -10,6 +10,7 @@ const analys= require('./models/analys.Model')
 const validator = require('validator');
 const crypto = require('crypto');
 const mailer = require('./mailer');
+const { FerrisWheel } = require('lucide-react');
 const port = process.env.PORT || 4000 
 
 app.use(cookies())
@@ -57,10 +58,10 @@ app.post('/create', async (req, res) => {
             verifyToken,
             isVerified: false
         });
+        const baseURL = process.env.BASE_URL || "http://localhost:4000";
         // Send verification email
         try
         {
-            const baseURL = process.env.BASE_URL || "http://localhost:4000";
 
             await mailer.sendMail({
                 from: process.env.EMAIL_USER,
@@ -186,32 +187,6 @@ app.get('/me', async (req,res)=>{
     }
 })
 
-app.post('/friend', async (req,res)=>{
-    const {frd,_id} = req.body;
-    if(!frd || !_id) 
-    {
-        return res.status(404).json({
-            success: false,
-            message: "User not found"
-        });
-    }
-    try {
-        const user = await users.findOne({_id:id})
-        if(!user) return res.status(200).json({
-                success: false,
-                message: "user not found"
-            });;
-        const partner = await users.findOne({userName:frd})
-        if(!partner) return res.status(401).json({ message: "No User found" });
-        
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Server error"
-        });
-    }
-})
-
 app.post('/analys', async (req, res) => {
     const { 
         basicStats, 
@@ -262,15 +237,15 @@ app.post('/analys', async (req, res) => {
     }
 });
 app.post('/forgot-password', async (req, res) => {
-    
     const { email  } = req.body;
-    try {
-        
+    try
+    {
+
         const user = await users.findOne({ email:email });
         
         // Always return the same message — don't reveal if email exists or not
         if (!user) {
-            return res.json({ message: "user If that email exists, a reset link has been sent" });
+            return res.json({ message: "If that email exists, a reset link has been sent" });
         }
         
         const resetToken = crypto.randomBytes(32).toString('hex');
@@ -288,18 +263,18 @@ app.post('/forgot-password', async (req, res) => {
         });
         
         res.json({ message: "If that email exists, a reset link has been sent" });
-    }
-    catch (error){
-        res.json({message:"forget password error"})
+    }catch (error)
+    {
+        res.json({ message: "Could not process reset request — try again later" });
     }
 });
 
 // Step 2 — Submit new password
 app.post('/reset-password/:token', async (req, res) => {
-    
     const { password } = req.body;
-    try{
-        
+    try
+    {
+
         const user = await users.findOne({
             resetToken: req.params.token,
             resetTokenExpiry: { $gt: Date.now() }   // token must not be expired
@@ -315,10 +290,9 @@ app.post('/reset-password/:token', async (req, res) => {
         await user.save();
         
         res.json({ success: true, message: "Password reset successfully. You can now log in." });
-    }
-    catch (error)
+    }catch(error)
     {
-        res.json({message:"reset password error"})
+        res.json({ message: "Could not reset password — try again later" });
     }
 });
 app.listen(port)
