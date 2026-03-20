@@ -60,22 +60,7 @@ app.post('/create', async (req, res) => {
         const baseURL = process.env.BASE_URL || "http://localhost:4000";
         // Send verification email
 
-            await mailer.sendMail({
-                from: process.env.EMAIL_USER,
-                to: email,
-                subject: 'Verify your email',
-                html: `
-                <div style="font-family: Arial; text-align: center;">
-                <h2>Verify Your Email</h2>
-                <p>Click the button below to verify your account:</p>
-                <a href="${baseURL}/verify/${verifyToken}" 
-                style="padding:10px 20px; background:#4CAF50; color:white; text-decoration:none; border-radius:5px;">
-                Verify Email
-                </a>
-                <p>If you didn’t request this, ignore this email.</p>
-                </div>
-                `
-            });
+            sendVerificationEmail(email, verifyToken, baseURL);
             
             return res.json({ success: true, message: "Check your email to verify your account" });
 
@@ -97,23 +82,7 @@ app.post('/varify' , async (req,res)=>{
         const baseURL = process.env.BASE_URL || "http://localhost:4000";
         // Send verification email
 
-            await mailer.sendMail({
-                from: process.env.EMAIL_USER,
-                to: email,
-                subject: 'Verify your email',
-                html: `
-                <div style="font-family: Arial; text-align: center;">
-                <h2>Verify Your Email</h2>
-                <p>Click the button below to verify your account:</p>
-                <a href="${baseURL}/verify/${verifyToken}" 
-                style="padding:10px 20px; background:#4CAF50; color:white; text-decoration:none; border-radius:5px;">
-                Verify Email
-                </a>
-                <p>If you didn’t request this, ignore this email.</p>
-                </div>
-                `
-            });
-            
+            sendVerificationEmail(email, verifyToken, baseURL);
             return res.json({ success: true, message: "Check your email to verify your account" });
 
     } catch (error) {
@@ -134,6 +103,27 @@ app.get('/verify/:token', async (req, res) => {
 
     res.json({ success: true, message: "Email verified! You can now log in." });
 });
+
+async function sendVerificationEmail(email, token, baseURL) {
+    try {
+        await mailer.sendMail({
+            to: email,
+            subject: 'Welcome — verify your email',
+            html: `
+            <div style="font-family: Arial; text-align: center;">
+                <h2>Welcome!</h2>
+                <p>Your account is active. Optionally verify your email:</p>
+                <a href="${baseURL}/verify/${token}"
+                style="padding:10px 20px; background:#4CAF50; color:white; text-decoration:none; border-radius:5px;">
+                Verify Email
+                </a>
+            </div>`,
+        });
+    } catch (err) {
+        // Already handled inside mailer.js but catch here too just in case
+        console.error('Verification email failed (non-fatal):', err.message);
+    }
+}
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
