@@ -2,7 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 const users = require('./models/user.Model')
-const cors = require('cors');x``
+const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 const cookies = require('cookie-parser')
