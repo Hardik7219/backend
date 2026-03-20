@@ -211,7 +211,7 @@ app.post('/friend', async (req,res)=>{
         });
     }
 })
-s
+
 app.post('/analys', async (req, res) => {
     const { 
         basicStats, 
@@ -262,9 +262,9 @@ app.post('/analys', async (req, res) => {
     }
 });
 app.post('/forgot-password', async (req, res) => {
+    
+    const { email  } = req.body;
     try {
-
-        const { email  } = req.body;
         
         const user = await users.findOne({ email:email });
         
@@ -290,15 +290,15 @@ app.post('/forgot-password', async (req, res) => {
         res.json({ message: "If that email exists, a reset link has been sent" });
     }
     catch (error){
-        res.json({message:error})
+        res.json({message:"forget password error"})
     }
 });
 
 // Step 2 — Submit new password
 app.post('/reset-password/:token', async (req, res) => {
+    
+    const { password } = req.body;
     try{
-
-        const { password } = req.body;
         
         const user = await users.findOne({
             resetToken: req.params.token,
@@ -318,7 +318,7 @@ app.post('/reset-password/:token', async (req, res) => {
     }
     catch (error)
     {
-        res.json({message:error})
+        res.json({message:"reset password error"})
     }
 });
 app.listen(port)
