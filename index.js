@@ -57,10 +57,10 @@ app.post('/create', async (req, res) => {
             verifyToken,
             isVerified: false
         });
-        const baseURL = process.env.BASE_URL || "http://localhost:4000";
         // Send verification email
         try
         {
+            const baseURL = process.env.BASE_URL || "http://localhost:4000";
 
             await mailer.sendMail({
                 from: process.env.EMAIL_USER,
