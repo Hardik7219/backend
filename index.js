@@ -2,7 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 const users = require('./models/user.Model')
-const cors = require('cors');
+const cors = require('cors');x``
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 const cookies = require('cookie-parser')
@@ -14,10 +14,13 @@ const port = process.env.PORT || 4000
 
 app.use(cookies())
 app.use(cors({
-    origin: "http://localhost:5173", // your React app
+    origin: [
+        "http://localhost:5173",     // Vite dev server
+        "app://.",                   // Electron production (file protocol)
+        "http://localhost:3000",     // fallback
+    ],
     credentials: true
 }));
-
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
@@ -82,8 +85,8 @@ app.post('/create', async (req, res) => {
         {
             res.json({message:"cant send the email"})
         }
+
     } catch (error) {
-        console.error(error);
         res.status(500).json({ message: "Error creating user" });
     }
 });
@@ -305,4 +308,4 @@ app.post('/reset-password/:token', async (req, res) => {
 
     res.json({ success: true, message: "Password reset successfully. You can now log in." });
 });
-app.listen(4000)
+app.listen(port)
