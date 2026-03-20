@@ -10,7 +10,6 @@ const analys= require('./models/analys.Model')
 const validator = require('validator');
 const crypto = require('crypto');
 const mailer = require('./mailer');
-const { FerrisWheel } = require('lucide-react');
 const port = process.env.PORT || 4000 
 
 app.use(cookies())
