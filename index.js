@@ -59,9 +59,6 @@ app.post('/create', async (req, res) => {
         });
         const baseURL = process.env.BASE_URL || "http://localhost:4000";
         // Send verification email
-        try
-        {
-
             await mailer.sendMail({
                 from: process.env.EMAIL_USER,
                 to: email,
@@ -80,11 +77,7 @@ app.post('/create', async (req, res) => {
             });
             
             res.json({ success: true, message: "Check your email to verify your account" });
-        }
-        catch(error)
-        {
-            res.json({message:"cant send the email"})
-        }
+
 
     } catch (error) {
         res.status(500).json({ message: "Error creating user" });
