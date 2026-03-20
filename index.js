@@ -89,7 +89,7 @@ app.get('/varify' , async (req,res)=>{
     try {
         const user = await users.findOne({email:email})
         if(!user) return res.json({message:'user not found'})
-        if(user.isVerified) return res.json({message:'already varified'})
+        if(user.isVerified==true) return res.json({message:'already varified'})
         
         const verifyToken = crypto.randomBytes(32).toString('hex');
         user.verifyToken= verifyToken
