@@ -84,7 +84,7 @@ app.post('/create', async (req, res) => {
     }
 });
 
-app.POST('/varify' , async (req,res)=>{
+app.post('/varify' , async (req,res)=>{
     const {email} = req.body
     try {
         const user = await users.findOne({email:email})
