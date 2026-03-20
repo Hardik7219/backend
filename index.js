@@ -262,50 +262,63 @@ app.post('/analys', async (req, res) => {
     }
 });
 app.post('/forgot-password', async (req, res) => {
-    const { email  } = req.body;
+    try {
 
-    const user = await users.findOne({ email:email });
-
-    // Always return the same message — don't reveal if email exists or not
-    if (!user) {
-        return res.json({ message: "user If that email exists, a reset link has been sent" });
-    }
-
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 1000 * 60 * 60; // 1 hour
-    await user.save();
-    const baseURL = process.env.BASE_URL || "http://localhost:4000";
-
-    await mailer.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: 'Reset your password',
-        html: `<p>Click to reset your password (link expires in 1 hour):</p>
+        const { email  } = req.body;
+        
+        const user = await users.findOne({ email:email });
+        
+        // Always return the same message — don't reveal if email exists or not
+        if (!user) {
+            return res.json({ message: "user If that email exists, a reset link has been sent" });
+        }
+        
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        user.resetToken = resetToken;
+        user.resetTokenExpiry = Date.now() + 1000 * 60 * 60; // 1 hour
+        await user.save();
+        const baseURL = process.env.BASE_URL || "http://localhost:4000";
+        
+        await mailer.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Reset your password',
+            html: `<p>Click to reset your password (link expires in 1 hour):</p>
             <a href="${baseURL}/reset-password/${resetToken}">Reset Password</a>`
-    });
-
-    res.json({ message: "If that email exists, a reset link has been sent" });
+        });
+        
+        res.json({ message: "If that email exists, a reset link has been sent" });
+    }
+    catch (error){
+        res.json({message:error})
+    }
 });
 
 // Step 2 — Submit new password
 app.post('/reset-password/:token', async (req, res) => {
-    const { password } = req.body;
+    try{
 
-    const user = await users.findOne({
-        resetToken: req.params.token,
-        resetTokenExpiry: { $gt: Date.now() }   // token must not be expired
-    });
-
-    if (!user)
-        return res.status(400).json({ message: "Invalid or expired reset link" });
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-    user.resetToken = undefined;
-    user.resetTokenExpiry = undefined;
-    await user.save();
-
-    res.json({ success: true, message: "Password reset successfully. You can now log in." });
+        const { password } = req.body;
+        
+        const user = await users.findOne({
+            resetToken: req.params.token,
+            resetTokenExpiry: { $gt: Date.now() }   // token must not be expired
+        });
+        
+        if (!user)
+            return res.status(400).json({ message: "Invalid or expired reset link" });
+        
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+        user.resetToken = undefined;
+        user.resetTokenExpiry = undefined;
+        await user.save();
+        
+        res.json({ success: true, message: "Password reset successfully. You can now log in." });
+    }
+    catch (error)
+    {
+        res.json({message:error})
+    }
 });
 app.listen(port)
