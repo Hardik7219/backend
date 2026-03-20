@@ -114,9 +114,10 @@ app.post('/varify' , async (req,res)=>{
                 `
             });
             
-            res.json({ success: true, message: "Check your email to verify your account" });
+            return res.json({ success: true, message: "Check your email to verify your account" });
 
     } catch (error) {
+        console.log(error)
         return res.json({message : 'can not varify yet'})
     }
 
