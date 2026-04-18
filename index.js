@@ -14,11 +14,7 @@ const port = process.env.PORT || 4000
 
 app.use(cookies())
 app.use(cors({
-    origin: [
-        "http://localhost:5173",     // Vite dev server
-        "app://.",                   // Electron production (file protocol)
-        "http://localhost:3000",     // fallback
-    ],
+    origin: true, 
     credentials: true
 }));
 app.use(express.json())
@@ -55,15 +51,15 @@ app.post('/create', async (req, res) => {
             email,
             password: hash,
             verifyToken,
-            isVerified: false
+            isVerified: true
         });
-        const baseURL = process.env.BASE_URL || "http://localhost:4000";
-        // Send verification email
+        // const baseURL = process.env.BASE_URL || "http://localhost:4000";
+        // // Send verification email
 
-            sendVerificationEmail(email, verifyToken, baseURL);
+        //     sendVerificationEmail(email, verifyToken, baseURL);
             
-            return res.json({ success: true, message: "Check your email to verify your account" });
-
+        //     return res.json({ success: true, message: "Check your email to verify your account" });
+        return res.status(201).json({ success: true, message: "Account created! You can now log in." });
     } catch (error) {
         res.status(500).json({ message: "Error creating user" });
     }
@@ -159,16 +155,15 @@ app.post('/login', async (req, res) => {
             { id: findUser._id, username : findUser.userName ,email: findUser.email},
             process.env.JWT_SECRET,{expiresIn : '7d'});
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000 
-        });
-        
+            res.cookie('token', token, {
+                httpOnly: true,
+                sameSite: "none",
+                secure: false
+            });
         res.status(200).json({
             success: true,
-            message: "Login successful"
+            message: "Login successful",
+            token: token 
         });
 
     } catch (error) {
@@ -180,32 +175,28 @@ app.post('/login', async (req, res) => {
     }
 });
 app.post('/logout', (req, res) => {
-    res.clearCookie('token', { httpOnly: true, sameSite: 'lax' });
+    res.clearCookie('token', { httpOnly: true, sameSite: 'none' });
     res.json({ success: true, message: "Logged out" });
 });
 
-app.get('/me', async (req,res)=>{
-    const token = req.cookies.token;    
-    if (!token) return res.status(401).json({
-    success: false,
-    message: "Unauthorized"
-});
+// In /me route, replace cookie logic with:
+app.get('/me', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
+
+    const token = authHeader.split(' ')[1]; // "Bearer <token>"
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        res.json({
+        return res.json({
             id: decoded.id,
             email: decoded.email,
-            username : decoded.username,
+            username: decoded.username,
         });
     } catch {
-        return res.status(401).json({
-                success: false,
-                message:'server error'
-            });
+        return res.status(401).json({ message: "Invalid token" });
     }
-})
+});
 
 app.post('/analys', async (req, res) => {
     const { 
