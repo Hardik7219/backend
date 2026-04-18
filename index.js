@@ -306,4 +306,39 @@ app.post('/reset-password/:token', async (req, res) => {
         res.json({ message: "Could not reset password — try again later" });
     }
 });
+
+app.post('/friend',async(req,res)=>{
+    const {frd,id} = req.body;
+    try {
+        
+        const user =  await users.findOne({_id:id});
+        const friend= await users.findOne({userName:frd});
+        if (!user) return res.json({ message: "user not found" })
+        if (!friend) return res.json({ message: "user not found" })
+        if (user.partner && user.partner.equals(friend._id)) {
+            return res.status(200).json({ success: true, message: "Already friends" });
+        }
+
+    user.partner=friend._id;
+    friend.partner=user._id;
+
+        await user.save();
+        await friend.save();
+        return res.status(200).json({
+            success: true,
+            message: "Added"
+        });
+    } catch (error) {
+        return res.send({message:"somthing happend"})
+    }
+})
+app.get('/analysFriend/:id',async(req,res)=>{
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
+    const id=req.params.id;
+    const user = await users.findById(id);
+    if(!user) return res.json({ message: "user not found" })
+    const partn= await analys.findOne({userId:user.partner})
+    res.send(partn)
+})
 app.listen(port)
