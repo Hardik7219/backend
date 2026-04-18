@@ -338,7 +338,8 @@ app.get('/analysFriend/:id',async(req,res)=>{
     const id=req.params.id;
     const user = await users.findById(id);
     if(!user) return res.json({ message: "user not found" })
+    const frd= await users.findOne({_id:user.partner})
     const partn= await analys.findOne({userId:user.partner})
-    res.send(partn)
+    res.send({data:partn,partn:frd.userName})
 })
 app.listen(port)
